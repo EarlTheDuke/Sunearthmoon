@@ -132,13 +132,13 @@ class EnhancedSolarSystemSimulation:
         # Set initial view
         self.ax.view_init(elev=20, azim=0)
         
-        # Initialize scatter plot elements (empty initially)
-        self.sun_scatter = self.ax.scatter([], [], [], s=self.sun_size, c='yellow', 
-                                         alpha=0.9, edgecolors='orange', linewidth=1, label='Sun')
-        self.earth_scatter = self.ax.scatter([], [], [], s=self.earth_size, c='blue', 
-                                           alpha=0.8, edgecolors='darkblue', linewidth=1, label='Earth')
-        self.moon_scatter = self.ax.scatter([], [], [], s=self.moon_size, c='gray', 
-                                          alpha=0.8, edgecolors='black', linewidth=1, label='Moon')
+        # Initialize plot elements for celestial bodies (using plot instead of scatter for better animation)
+        self.sun_plot, = self.ax.plot([], [], [], 'o', color='yellow', markersize=12, 
+                                     markeredgecolor='orange', markeredgewidth=1, label='Sun')
+        self.earth_plot, = self.ax.plot([], [], [], 'o', color='blue', markersize=8, 
+                                       markeredgecolor='darkblue', markeredgewidth=1, label='Earth')
+        self.moon_plot, = self.ax.plot([], [], [], 'o', color='gray', markersize=5, 
+                                      markeredgecolor='black', markeredgewidth=1, label='Moon')
         
         # Initialize trail lines
         self.earth_trail, = self.ax.plot([], [], [], 'b-', alpha=0.4, linewidth=1.5, label='Earth Trail')
@@ -191,12 +191,16 @@ class EnhancedSolarSystemSimulation:
         else:
             return [], [], []
     
-    def _update_scatter(self, scatter, positions, frame):
-        """Update scatter plot with new positions."""
+    def _update_plot(self, plot_obj, positions, frame):
+        """Update plot object with new positions."""
         if frame < len(positions):
             pos = positions[frame]
-            # Remove previous scatter data and add new
-            scatter._offsets3d = ([pos[0]], [pos[1]], [pos[2]])
+            plot_obj.set_data([pos[0]], [pos[1]])
+            plot_obj.set_3d_properties([pos[2]])
+        else:
+            # Hide the object if no data
+            plot_obj.set_data([], [])
+            plot_obj.set_3d_properties([])
     
     def animate(self, frame):
         """Animation function called for each frame."""
@@ -227,23 +231,27 @@ class EnhancedSolarSystemSimulation:
             self.ax.view_init(elev=20, azim=azim)
             
             # Show only Sun
-            self._update_scatter(self.sun_scatter, self.sun_positions, frame)
+            self._update_plot(self.sun_plot, self.sun_positions, frame)
             # Hide other bodies
-            self.earth_scatter._offsets3d = ([], [], [])
-            self.moon_scatter._offsets3d = ([], [], [])
+            self.earth_plot.set_data([], [])
+            self.earth_plot.set_3d_properties([])
+            self.moon_plot.set_data([], [])
+            self.moon_plot.set_3d_properties([])
             
         # Phase 2: Sun + Earth
         elif frame < self.phase2_frames:
             self.phase_text.set_text(f'Phase 2: Sun + Earth Orbit ({frame_info})')
-            earth_dist = np.linalg.norm(self.earth_positions[frame])
-            self.info_text.set_text(f'Earth distance: {earth_dist:.3f} AU')
+            earth_pos = self.earth_positions[frame]
+            earth_dist = np.linalg.norm(earth_pos)
+            self.info_text.set_text(f'Earth: ({earth_pos[0]:.3f}, {earth_pos[1]:.3f}, {earth_pos[2]:.3f}) AU, dist: {earth_dist:.3f}')
             self._set_wide_view()
             self.ax.view_init(elev=20, azim=azim)
             
             # Show Sun and Earth
-            self._update_scatter(self.sun_scatter, self.sun_positions, frame)
-            self._update_scatter(self.earth_scatter, self.earth_positions, frame)
-            self.moon_scatter._offsets3d = ([], [], [])
+            self._update_plot(self.sun_plot, self.sun_positions, frame)
+            self._update_plot(self.earth_plot, self.earth_positions, frame)
+            self.moon_plot.set_data([], [])
+            self.moon_plot.set_3d_properties([])
             
             # Earth trail
             trail_x, trail_y, trail_z = self._get_trail_data(self.earth_positions, frame, self.max_trail_points)
@@ -260,9 +268,10 @@ class EnhancedSolarSystemSimulation:
             self.ax.view_init(elev=15, azim=azim)
             
             # Show Earth and Moon (Sun not visible in this close view)
-            self.sun_scatter._offsets3d = ([], [], [])
-            self._update_scatter(self.earth_scatter, self.earth_positions, frame)
-            self._update_scatter(self.moon_scatter, self.moon_positions, frame)
+            self.sun_plot.set_data([], [])
+            self.sun_plot.set_3d_properties([])
+            self._update_plot(self.earth_plot, self.earth_positions, frame)
+            self._update_plot(self.moon_plot, self.moon_positions, frame)
             
             # Both trails (shorter for close view)
             trail_length = min(self.max_trail_points, 100)
@@ -279,7 +288,7 @@ class EnhancedSolarSystemSimulation:
                 self.moon_trail.set_data(trail_x, trail_y)
                 self.moon_trail.set_3d_properties(trail_z)
         
-        return (self.sun_scatter, self.earth_scatter, self.moon_scatter, 
+        return (self.sun_plot, self.earth_plot, self.moon_plot, 
                 self.earth_trail, self.moon_trail, 
                 self.title_text, self.time_text, self.phase_text, self.info_text)
     
