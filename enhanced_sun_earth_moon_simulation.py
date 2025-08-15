@@ -59,9 +59,9 @@ class EnhancedSolarSystemSimulation:
         self.num_frames = int(total_hours / time_step_hours)
         self.time_array = self.start_time + np.arange(self.num_frames) * time_step_hours * u.hour
         
-        # Animation phases
-        self.phase1_frames = self.num_frames // 3  # Sun only
-        self.phase2_frames = 2 * self.num_frames // 3  # Sun + Earth
+        # Animation phases - more balanced timing
+        self.phase1_frames = max(50, self.num_frames // 6)  # Sun only (shorter)
+        self.phase2_frames = max(100, self.num_frames // 2)  # Sun + Earth (longer)
         self.phase3_frames = self.num_frames  # Sun + Earth + Moon
         
         print(f"📊 Total frames: {self.num_frames}")
@@ -210,6 +210,9 @@ class EnhancedSolarSystemSimulation:
         self.title_text.set_text(f'Enhanced Sun-Earth-Moon System (Start: {self.start_date_str})')
         self.time_text.set_text(f'Date: {current_time.iso[:10]} {current_time.iso[11:19]} UTC')
         
+        # Add frame counter for debugging
+        frame_info = f'Frame: {frame+1}/{self.num_frames}'
+        
         # Clear previous trail data
         self.earth_trail.set_data([], [])
         self.earth_trail.set_3d_properties([])
@@ -218,8 +221,8 @@ class EnhancedSolarSystemSimulation:
         
         # Phase 1: Sun only
         if frame < self.phase1_frames:
-            self.phase_text.set_text('Phase 1: Sun Only')
-            self.info_text.set_text('Establishing heliocentric reference frame')
+            self.phase_text.set_text(f'Phase 1: Sun Only ({frame_info})')
+            self.info_text.set_text(f'Establishing heliocentric reference frame')
             self._set_wide_view()
             self.ax.view_init(elev=20, azim=azim)
             
@@ -231,7 +234,7 @@ class EnhancedSolarSystemSimulation:
             
         # Phase 2: Sun + Earth
         elif frame < self.phase2_frames:
-            self.phase_text.set_text('Phase 2: Sun + Earth Orbit')
+            self.phase_text.set_text(f'Phase 2: Sun + Earth Orbit ({frame_info})')
             earth_dist = np.linalg.norm(self.earth_positions[frame])
             self.info_text.set_text(f'Earth distance: {earth_dist:.3f} AU')
             self._set_wide_view()
@@ -250,7 +253,7 @@ class EnhancedSolarSystemSimulation:
         
         # Phase 3: Sun + Earth + Moon (zoomed to Earth-Moon system)
         else:
-            self.phase_text.set_text('Phase 3: Earth-Moon System (Zoomed 0.003 AU)')
+            self.phase_text.set_text(f'Phase 3: Earth-Moon System ({frame_info})')
             moon_earth_dist = np.linalg.norm(self.moon_positions[frame] - self.earth_positions[frame])
             self.info_text.set_text(f'Moon-Earth distance: {moon_earth_dist:.6f} AU')
             self._set_earth_moon_view(frame)
@@ -289,7 +292,7 @@ class EnhancedSolarSystemSimulation:
             self.fig, 
             self.animate, 
             frames=self.num_frames,
-            interval=100,  # 100ms between frames (10 FPS)
+            interval=50,   # 50ms between frames (20 FPS) - faster to see all phases
             blit=False,    # Set to False for 3D plots
             repeat=True
         )
