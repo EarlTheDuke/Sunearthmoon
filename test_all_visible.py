@@ -118,13 +118,10 @@ class TestAllVisibleSimulation:
         # Set initial view
         self.ax.view_init(elev=20, azim=0)
         
-        # Initialize plot elements for celestial bodies - LARGER SIZES FOR VISIBILITY
-        self.sun_plot, = self.ax.plot([], [], [], 'o', color='yellow', markersize=15, 
-                                     markeredgecolor='orange', markeredgewidth=2, label='Sun', alpha=0.9)
-        self.earth_plot, = self.ax.plot([], [], [], 'o', color='blue', markersize=12, 
-                                       markeredgecolor='darkblue', markeredgewidth=2, label='Earth', alpha=0.9)
-        self.moon_plot, = self.ax.plot([], [], [], 'o', color='gray', markersize=8, 
-                                      markeredgecolor='black', markeredgewidth=2, label='Moon', alpha=0.9)
+        # Initialize plot elements for celestial bodies - CLEAN CIRCLES WITHOUT RINGS
+        self.sun_plot, = self.ax.plot([], [], [], 'o', color='yellow', markersize=15, label='Sun', alpha=0.9)
+        self.earth_plot, = self.ax.plot([], [], [], 'o', color='blue', markersize=12, label='Earth', alpha=0.9)
+        self.moon_plot, = self.ax.plot([], [], [], 'o', color='gray', markersize=8, label='Moon', alpha=0.9)
         
         # Initialize trail lines
         self.earth_trail, = self.ax.plot([], [], [], 'b-', alpha=0.6, linewidth=2, label='Earth Trail')

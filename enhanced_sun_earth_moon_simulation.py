@@ -132,13 +132,10 @@ class EnhancedSolarSystemSimulation:
         # Set initial view
         self.ax.view_init(elev=20, azim=0)
         
-        # Initialize plot elements for celestial bodies (using plot instead of scatter for better animation)
-        self.sun_plot, = self.ax.plot([], [], [], 'o', color='yellow', markersize=12, 
-                                     markeredgecolor='orange', markeredgewidth=1, label='Sun')
-        self.earth_plot, = self.ax.plot([], [], [], 'o', color='blue', markersize=8, 
-                                       markeredgecolor='darkblue', markeredgewidth=1, label='Earth')
-        self.moon_plot, = self.ax.plot([], [], [], 'o', color='gray', markersize=5, 
-                                      markeredgecolor='black', markeredgewidth=1, label='Moon')
+        # Initialize plot elements for celestial bodies - clean circles without rings
+        self.sun_plot, = self.ax.plot([], [], [], 'o', color='yellow', markersize=12, label='Sun')
+        self.earth_plot, = self.ax.plot([], [], [], 'o', color='blue', markersize=8, label='Earth')
+        self.moon_plot, = self.ax.plot([], [], [], 'o', color='gray', markersize=5, label='Moon')
         
         # Initialize trail lines
         self.earth_trail, = self.ax.plot([], [], [], 'b-', alpha=0.4, linewidth=1.5, label='Earth Trail')
